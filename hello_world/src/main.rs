@@ -143,9 +143,19 @@ impl Swarm {
 }
 
 fn main() {
-    let mut a_swarm = Swarm::new_swarm(2000000);
-    for i in 0..100 {
-        a_swarm.evolution(0.5, 4.0, 2.0);
-        println!("{:?}", &a_swarm.global_best_position);
+    let args: Vec<String> = std::env::args().collect();
+    if args.len() == 1 {
+        println!("pso num_of_particles num_of_step w c1 c2" );
+    }else{
+        let num_of_particles:usize = args[1].parse().unwrap();
+        let num_of_step:usize = args[2].parse().unwrap();
+        let w:f64 = args[3].parse().unwrap();
+        let c1:f64 = args[4].parse().unwrap();
+        let c2:f64 = args[5].parse().unwrap();
+        let mut a_swarm = Swarm::new_swarm(num_of_particles);
+        for i in 0..num_of_step{
+            a_swarm.evolution(w, c1,c2);
+            println!("{:?}",&a_swarm.global_best_position);
+        }
     }
 }
