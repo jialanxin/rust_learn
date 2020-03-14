@@ -44,30 +44,30 @@ impl Swarm {
         })
     }
     fn croseeover(&mut self, crossover_probability: f64) {
-        let particles = &self.particles;
+        let particles = &mut self.particles;
         let mutation_force_list = &self.mutation_force_list;
         let mut rng = thread_rng();
         let nums: Vec<usize> = (0..self.number_of_particles).collect();
         let force_change_index: usize = *nums.choose(&mut rng).unwrap();
         self.crossover_res_list
             .par_iter_mut()
-            .enumerate()
-            .for_each(|(i, u)| {
-                u.calc_crossover_res(
-                    crossover_probability,
-                    &particles[i],
-                    &mutation_force_list[i],
-                    force_change_index,
-                )
+            .zip(
+                particles
+                    .par_iter()
+                    .zip(mutation_force_list)
+                    .collect::<Vec<(&Particle, &MutationForce)>>(),
+            )
+            .for_each(|(c, (p, m))| {
+                c.calc_crossover_res(crossover_probability, p, m, force_change_index)
             })
     }
     fn select(&mut self, x_data: &Vec<f64>, y_data: &Vec<f64>) {
         let crossover_res_list = &self.crossover_res_list;
         self.particles
             .par_iter_mut()
-            .enumerate()
-            .for_each(|(i, p)| {
-                p.select(x_data, y_data, &crossover_res_list[i]);
+            .zip(crossover_res_list)
+            .for_each(|(p, c)| {
+                p.select(x_data, y_data, c);
             });
     }
     pub fn evolution(
@@ -81,31 +81,31 @@ impl Swarm {
         self.croseeover(crossover_probability);
         self.select(x_data, y_data);
     }
-    pub fn result(&self, x_data: &Vec<f64>, y_data: &Vec<f64>) {
-        println!(
-            "{:?}",
+    pub fn result(&self, x_data: &Vec<f64>, y_data: &Vec<f64>)->(f64,Vec<f64>) {
+        let mut best_loss: Option<f64> = None;
+        let mut best_position_index: Option<usize> = None;
+        self.particles
+            .iter()
+            .map(|x| evaluate(&x.position, x_data, y_data))
+            .enumerate()
+            .for_each(|(i, x)| match best_loss {
+                None => {
+                    best_loss = Some(x);
+                    best_position_index = Some(i);
+                }
+                _ => match x <= best_loss.unwrap() {
+                    true => {
+                        best_loss = Some(x);
+                        best_position_index = Some(i);
+                    }
+                    _ => (),
+                },
+            });
+        (best_loss.unwrap(),
             self.particles
-                .iter()
-                .map(|x| x.position[0])
-                .collect::<Vec<f64>>()
-        );
-        let res = self.particles
-                .iter()
-                .map(|x| evaluate(&x.position, x_data, y_data))
-                .collect::<Vec<f64>>();
-        let mut best:Option<f64> = None;
-        res.iter().for_each(|x|match best{
-            None => best=Some(*x),
-            _ => match *x<=best.unwrap() {
-                true=> best = Some(*x),
-                _=> ()
-            }
-        });
-        
-        println!(
-            "{:?}",
-            best.unwrap()
-        );
+                .get(best_position_index.unwrap())
+                .unwrap()
+                .position.clone())
 
     }
 }
