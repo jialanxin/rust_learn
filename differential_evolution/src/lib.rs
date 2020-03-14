@@ -1,6 +1,3 @@
-mod crossover_res;
-mod mutation_force;
-mod particle;
 mod swarm;
 use self::swarm::Swarm;
 use pyo3::prelude::*;

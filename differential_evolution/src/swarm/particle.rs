@@ -1,4 +1,4 @@
-use crate::crossover_res::CrossoverResult;
+use super::crossover_res::CrossoverResult;
 use crate::evaluate;
 use rand::Rng;
 #[derive(Debug)]

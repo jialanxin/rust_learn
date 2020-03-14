@@ -1,7 +1,10 @@
-use crate::crossover_res::CrossoverResult;
-use crate::evaluate;
-use crate::mutation_force::MutationForce;
-use crate::particle::Particle;
+mod crossover_res;
+mod mutation_force;
+mod particle;
+use self::crossover_res::CrossoverResult;
+use super::evaluate;
+use self::mutation_force::MutationForce;
+use self::particle::Particle;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use rayon::prelude::*;

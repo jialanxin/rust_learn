@@ -1,5 +1,5 @@
-use crate::mutation_force::MutationForce;
-use crate::particle::Particle;
+use super::mutation_force::MutationForce;
+use super::particle::Particle;
 use rand::Rng;
 #[derive(Debug)]
 pub struct CrossoverResult {

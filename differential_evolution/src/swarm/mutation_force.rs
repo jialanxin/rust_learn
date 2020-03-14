@@ -1,4 +1,4 @@
-use crate::particle::Particle;
+use super::particle::Particle;
 #[derive(Debug)]
 pub struct MutationForce {
     pub mutation_force: Option<Vec<f64>>,
