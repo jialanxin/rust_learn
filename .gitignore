@@ -1,2 +1,6 @@
 md5/
 differential_evolution/target/
+PSO/target/
+*.svg
+*.data
+*.old
