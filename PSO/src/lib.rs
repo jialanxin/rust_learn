@@ -29,7 +29,7 @@ impl Particle {
         let velocity_max = position_range.iter().map(|a| a / 5.0).collect();
         let velocity_min = position_range.iter().map(|a| -a / 5.0).collect();
         let local_best_position = position.clone();
-        let local_best_loss = evaluate(&position, &x_data, &y_data);
+        let local_best_loss = calc_least_square(&position, &x_data, &y_data);
         Particle {
             position,
             position_max: p_max,
@@ -89,7 +89,7 @@ impl Particle {
                 }
             })
             .collect();
-        let loss = evaluate(&self.position, &x_data, &y_data);
+        let loss = calc_least_square(&self.position, &x_data, &y_data);
         if loss < self.local_best_loss {
             self.local_best_loss = loss;
             self.local_best_position = self.position.clone();
@@ -143,6 +143,33 @@ impl Swarm {
         self.global_best_position = global_best_position.unwrap();
         self.global_best_loss = global_best_loss;
     }
+    fn result_evaluate(&self) -> (Vec<f64>, Vec<f64>) {
+        let position_len = self.global_best_position.len();
+        let mut sum_of_position = vec![0.0; position_len];
+        for i in 0..self.num_of_particles {
+            sum_of_position
+                .iter_mut()
+                .zip(&self.particle_list[i].position)
+                .for_each(|(sop, p)| *sop += p)
+        }
+        let mean_position = sum_of_position
+            .iter()
+            .map(|sop| *sop / self.num_of_particles as f64)
+            .collect::<Vec<f64>>();
+        let mut sum_of_square_error = vec![0.0; position_len];
+        for i in 0..self.num_of_particles {
+            sum_of_square_error
+                .iter_mut()
+                .zip(&self.particle_list[i].position)
+                .zip(&mean_position)
+                .for_each(|((sose, p), mp)| *sose += (p - mp).powi(2));
+        }
+        let standard_var_of_position = sum_of_square_error
+            .iter()
+            .map(|sose| (*sose / self.num_of_particles as f64).sqrt())
+            .collect::<Vec<f64>>();
+        (mean_position, standard_var_of_position)
+    }
 }
 fn compare(
     particle_list: &[Particle],
@@ -169,7 +196,7 @@ fn compare(
         candidate_global_best_position,
     )
 }
-fn evaluate(particle_position: &[f64], x_data: &[f64], y_data: &[f64]) -> f64 {
+fn calc_least_square(particle_position: &[f64], x_data: &[f64], y_data: &[f64]) -> f64 {
     let a1 = particle_position[0];
     let a2 = particle_position[1];
     let e1 = particle_position[2];
@@ -192,7 +219,7 @@ pub fn classic_pso(
     c1: f64,
     c2: f64,
     steps: usize,
-) -> PyResult<(f64, Vec<f64>)> {
+) -> PyResult<(f64, Vec<f64>, Vec<f64>, Vec<f64>)> {
     let mut a_swarm = Swarm::new(
         num_of_particles,
         &position_max,
@@ -203,7 +230,13 @@ pub fn classic_pso(
     for _ in 0..steps {
         a_swarm.evolution(w, c1, c2);
     }
-    Ok((a_swarm.global_best_loss, a_swarm.global_best_position))
+    let (mean_position, standard_var_of_position) = a_swarm.result_evaluate();
+    Ok((
+        a_swarm.global_best_loss,
+        a_swarm.global_best_position,
+        mean_position,
+        standard_var_of_position,
+    ))
 }
 
 #[pymodule]
