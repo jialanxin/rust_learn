@@ -24,4 +24,4 @@ jobs:
     - uses: actions/upload-artifact@v1.0.0
       with: 
         name: libpso.so
-        path: rust_learn/PSO/target/release/libpso.so  
+        path: PSO/target/release/libpso.so  
