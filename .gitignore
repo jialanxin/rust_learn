@@ -1,6 +1,7 @@
-md5/
 differential_evolution/target/
 PSO/target/
+PSO_Lorentzian/target/
+PSO_Fano/target/
 *.svg
 *.data
 *.old
