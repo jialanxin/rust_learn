@@ -5,8 +5,8 @@ use self::crossover_res::CrossoverResult;
 use super::evaluate;
 use self::mutation_force::MutationForce;
 use self::particle::Particle;
-use rand::seq::SliceRandom;
-use rand::thread_rng;
+use rand::prelude::IndexedRandom;
+use rand::rng;
 use rayon::prelude::*;
 #[derive(Debug)]
 pub struct Swarm {
@@ -39,7 +39,7 @@ impl Swarm {
     fn mutation(&mut self, differential_weight: f64) {
         let particles = &self.particles;
         self.mutation_force_list.par_iter_mut().for_each(|x| {
-            let mut rng = thread_rng();
+            let mut rng = rng();
             let particle1 = particles.choose(&mut rng).unwrap();
             let particle2 = particles.choose(&mut rng).unwrap();
             let particle3 = particles.choose(&mut rng).unwrap();
@@ -49,7 +49,7 @@ impl Swarm {
     fn croseeover(&mut self, crossover_probability: f64) {
         let particles = &mut self.particles;
         let mutation_force_list = &self.mutation_force_list;
-        let mut rng = thread_rng();
+        let mut rng = rng();
         let nums: Vec<usize> = (0..self.number_of_particles).collect();
         let force_change_index: usize = *nums.choose(&mut rng).unwrap();
         self.crossover_res_list

@@ -12,10 +12,10 @@ impl Particle {
             .zip(position_min.iter())
             .map(|(a, b)| a - b)
             .collect();
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let position: Vec<f64> = position_range
             .iter()
-            .map(|a| rng.gen::<f64>() * a)
+            .map(|a| rng.random::<f64>() * a)
             .zip(position_min.iter())
             .map(|(a, b)| a + b)
             .collect();

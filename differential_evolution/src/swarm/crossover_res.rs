@@ -18,7 +18,7 @@ impl CrossoverResult {
         mutation_force: &MutationForce,
         force_change_index: usize,
     ) {
-        let r = rand::thread_rng().gen::<f64>();
+        let r = rand::rng().random::<f64>();
         for (j, u) in self.crossover_result.iter_mut().enumerate() {
             if r <= cross_probability || j == force_change_index {
                 *u = Some(

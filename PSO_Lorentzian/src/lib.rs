@@ -31,10 +31,10 @@ impl Particle {
         // 计算出位置上下限之间的距离
         let position_range: Vec<f64> = p_max.iter().zip(&p_min).map(|(a, b)| a - b).collect();
         // 以均匀分布选取粒子的初始位置
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let position: Vec<f64> = position_range
             .iter()
-            .map(|a| a * rng.gen::<f64>())
+            .map(|a| a * rng.random::<f64>())
             .zip(&p_min)
             .map(|(a, b)| a + b)
             .collect();
@@ -68,7 +68,7 @@ impl Particle {
         x_data: &[f64],
         y_data: &[f64],
     ) {
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         // 更新速度 v = w * v + c1 * rand * (lbp - p) + c2 * rand * (gbp - p)。控制速度的上限。
         self.velocity = self
             .position
@@ -77,7 +77,7 @@ impl Particle {
             .zip(global_best_position)
             .zip(&self.velocity)
             .map(|(((p, lbp), gbp), v)| {
-                w * v + c1 * rng.gen::<f64>() * (lbp - p) + c2 * rng.gen::<f64>() * (gbp - p)
+                w * v + c1 * rng.random::<f64>() * (lbp - p) + c2 * rng.random::<f64>() * (gbp - p)
             })
             .zip(&self.velocity_max)
             .zip(&self.velocity_min)
@@ -294,8 +294,8 @@ pub fn classic_pso(
 }
 
 #[pymodule]
-fn lorentzian(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_wrapped(wrap_pyfunction!(classic_pso))?;
+fn lorentzian(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(classic_pso, m)?)?;
 
     Ok(())
 }

@@ -16,8 +16,8 @@ fn de(position_max:Vec<f64>,position_min:Vec<f64>,x_data:Vec<f64>,y_data:Vec<f64
     Ok((best_loss,best_position))
 }
 #[pymodule]
-fn differential_evolution(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_wrapped(wrap_pyfunction!(de))?;
+fn differential_evolution(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(de, m)?)?;
 
     Ok(())
 }
