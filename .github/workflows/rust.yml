@@ -12,15 +12,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions-rs/toolchain@v1
-      with: 
-        toolchain: nightly
-        default: true    
+    - uses: actions/checkout@v5
+    - uses: dtolnay/rust-toolchain@1.89.0
+    - uses: actions/setup-python@v6
+      with:
+        python-version: '3.x'
     - name: Build
-      run: |
-        cd ./PSO
-        cargo build --verbose --release
+      working-directory: ./PSO
+      env:
+        PYO3_PYTHON: python
+      run: cargo build --locked --verbose --release --lib
     - uses: actions/upload-artifact@v4
       with: 
         name: libpso.so
